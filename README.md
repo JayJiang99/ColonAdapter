@@ -10,7 +10,7 @@ This repository provides the **official PyTorch implementation** of the paper
 - [x] **Evaluation code**: update and test depth evaluation (`eval.sh`, `evaluate_depth_colonaf.py`).
 - [x] **Inference code**: update and test folder-based inference (`infer.sh`, `infer_depth_folder.py`).
 - [ ] **Training code**: clean up and release training pipeline (`train.sh`, `trainer_end_to_end_3r.py`, related options).
-- [ ] **Pretrained weights**: upload ColonAdapter model checkpoints and document how to download/use them.
+- [x] **Pretrained weights**: upload ColonAdapter model checkpoints and document how to download/use them.
 
 
 The main entry points are:
@@ -78,6 +78,8 @@ You can edit `train.sh` to:
 
 
 ## 4. Evaluation (with Ground-Truth Depth)
+
+Download [model weight]( https://1drv.ms/f/c/bee3ae4296a6dabd/IgDH-5hbzl7SRICurcGewxX7AYd5gRVzo35ElUlpz_2ez8Y ) to WEIGHT_DIR. 
 
 For quantitative depth evaluation against ground-truth depth maps, use `eval.sh`, which calls `evaluate_depth_colonaf.py`:
 
