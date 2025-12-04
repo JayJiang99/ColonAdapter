@@ -1,0 +1,13 @@
+splits/
+infer_images/
+infer_images_pred/
+*.pth
+*.npz
+__pycache__/
+*.npy
+*.pt.1
+*.pt
+third_party/sam2/checkpoints/
+third_party/sam2/checkpoints/sam2.1_hiera_large.pt.1
+infer_images/
+infer_images_pred/
