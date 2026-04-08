@@ -28,7 +28,7 @@ class MonodepthOptions:
         self.parser.add_argument("--split",
                                  type=str,
                                  help="which training split to use",
-                                 choices=["synthetic_colon", "synthetic_dynamic_colon_complete", "c3vd"],
+                                 choices=["synthetic_colon"],
                                  default="synthetic_colon")
         self.parser.add_argument("--num_layers",
                                  type=int,
@@ -39,7 +39,7 @@ class MonodepthOptions:
                                  type=str,
                                  help="dataset to train on",
                                  default="synthetic_colon",
-                                 choices=["synthetic_colon", "c3vd"])
+                                 choices=["synthetic_colon"])
         self.parser.add_argument("--png",
                                  help="if set, trains from raw KITTI png files (instead of jpgs)",
                                  action="store_true")
@@ -206,8 +206,7 @@ class MonodepthOptions:
         self.parser.add_argument("--eval_split",
                                  type=str,
                                  default="synthetic_colon",
-                                 choices=[
-                                    "synthetic_colon","synthetic_colon_complete","synthetic_colon_0515", "synthetic_dynamic_colon_complete", "c3vd", "c3vd_undist_crop_brown", "c3vd_shades"],
+                                 choices=["synthetic_colon"],
                                  help="which split to run eval on")
         self.parser.add_argument("--save_pred_disps",
                                  help="if set saves predicted disparities",

@@ -48,33 +48,78 @@ In both cases, a CUDA-capable GPU is strongly recommended for training and evalu
 The scripts expect the datasets to be organized similarly to the original Monodepth2 / AF-SfMLearner structure (e.g. EndoVis, C3VD, SyntheticColon).  
 The exact `--data_path` you pass in `train.sh` / `eval.sh` should point to the preprocessed dataset root (e.g. C3VD reorganized and undistorted, or SyntheticColon).
 
-Ground-truth depth maps for evaluation should already be exported into the `splits/` structure (e.g. `splits/c3vd_undist_crop_brown/gt_depths.npz`), as used by `evaluate_depth_colonaf.py`.
+Ground-truth depth maps for evaluation should already be exported into the `splits/` structure (e.g. `splits/synthetic_colon/gt_depths.npz`), as used by `evaluate_depth_colonaf.py`.
 
 
-## 3. Training - TODO:
+## 3. Training
 
-Please check `options.py` to update model weight and other params.
-The recommended way to launch end-to-end training is via `train.sh`:
+### Quick Start
 
 ```bash
 bash train.sh
 ```
 
-Current `train.sh` content:
+### Dataset Preparation
 
-```bash
-CUDA_VISIBLE_DEVICES=3 python train_end_to_end.py \
-  --data_path DATA_DIR \
-  --log_dir LOG_DIR
+The dataset structure follows the AF-SfMLearner convention:
+
+```
+DATA_ROOT/
+  scene_1/
+    keyframe_1/
+      image_02/
+        data/
+          0000000001.png
+          0000000002.png
+          ...
+    keyframe_2/
+      ...
+  scene_2/
+    ...
 ```
 
-- **`--data_path`**: root directory of your training dataset (e.g. C3VD or SyntheticColon).
-- **`--log_dir`**: where TensorBoard logs, checkpoints, and models are written.
+You need to create the `splits/` directory with train/val/test split files:
 
-You can edit `train.sh` to:
-- Change `CUDA_VISIBLE_DEVICES` to your preferred GPU id(s).
-- Swap `--data_path` and `--log_dir` for your own datasets and experiment folders.
-- Add extra flags defined in `options.py` (e.g. `--batch_size`, `--num_epochs`, etc.).
+```
+splits/
+  your_dataset/
+    train_files.txt   # one scene path per line, e.g., "scene_1"
+    val_files.txt
+    test_files.txt
+    gt_depths.npz     # optional, for evaluation
+    gt_poses.npz      # optional, for pose evaluation
+```
+
+**Generating splits from video**: If you have video files (e.g., RGB.mp4), convert them to image sequences using ffmpeg, then extract keyframes and organize them into the directory structure above. Refer to the [AF-SfMLearner dataset preprocessing guide](https://github.com/ShuweiShao/AF-SfMLearner/tree/main/dataset) for detailed instructions on converting Endovis, SCARED, C3VD, or other endoscopic datasets.
+
+**Ground-truth depth for evaluation**: Export depth maps into `gt_depths.npz` (shape: `(N, H, W)`) and poses into `gt_poses.npz` (shape: `(N, 4, 4)`). See `evaluate_depth_colonaf.py` for the expected format.
+
+### Training Command
+
+The `train.sh` script runs end-to-end training:
+
+```bash
+CUDA_VISIBLE_DEVICES=0 python train_end_to_end.py \
+  --data_path /path/to/DATA_ROOT \
+  --log_dir /path/to/LOG_DIR \
+  --num_epochs 40 \
+  --learning_rate 1e-4 \
+  --scheduler_step_size 20 \
+  --lora_rank 16 \
+  --lora_alpha 1.0 \
+  --lora_dropout 0.1 \
+  --pretrained_path /path/to/DUSt3R_ViTLarge_BaseDecoder_512_dpt.pth
+```
+
+Key arguments:
+- **`--data_path`**: root directory of your training dataset.
+- **`--log_dir`**: where TensorBoard logs, checkpoints, and models are written.
+- **`--pretrained_path`**: path to [DUSt3R pretrained weights](https://download.europe.naverlabs.com/ComputerVision/DUSt3R/).
+- **`--num_epochs`**: number of training epochs (default: 40).
+- **`--learning_rate`**: base learning rate (default: 1e-4).
+- **`--lora_rank`**, **`--lora_alpha`**, **`--lora_dropout`**: LoRA fine-tuning parameters. **Note**: `lora_alpha=1.0` is critical — other values have been shown to cause training failure.
+
+You can follow stage-one training of [AF-SfMLearner](https://github.com/ShuweiShao/AF-SfMLearner/tree/main) repository for training the affiliation module. After training is complete, specify the directory path containing the trained model weights using the load_weights_folder argument.
 
 
 ## 4. Evaluation (with Ground-Truth Depth)
